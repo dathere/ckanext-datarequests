@@ -29,6 +29,7 @@ import re
 
 from ckan.common import request
 from urllib import urlencode
+from pylons import config
 
 
 _link = re.compile(r'(?:(https?://)|(www\.))(\S+\b/?)([!"#$%&\'()*+,\-./:;<=>?@[\\\]^_`{|}~]*)(\s|$)', re.I)
@@ -199,7 +200,9 @@ class DataRequestsUI(base.BaseController):
 
         # Check access
         try:
-            tk.check_access(constants.DATAREQUEST_CREATE, context, None)
+            anonymous_access = plugins.toolkit.asbool(config.get('ckanext.datarequests.anonymous', False))
+            if not anonymous_access:
+                tk.check_access(constants.DATAREQUEST_CREATE, context, None)
             self._process_post(constants.DATAREQUEST_CREATE, context)
 
             # The form is always rendered

@@ -25,6 +25,7 @@ import cgi
 import db
 import logging
 import validator
+from pylons import config
 
 c = plugins.toolkit.c
 log = logging.getLogger(__name__)
@@ -151,7 +152,9 @@ def datarequest_create(context, data_dict):
     db.init_db(model)
 
     # Check access
-    tk.check_access(constants.DATAREQUEST_CREATE, context, data_dict)
+    anonymous_access = plugins.toolkit.asbool(config.get('ckanext.datarequests.anonymous', False))
+    if not anonymous_access:
+        tk.check_access(constants.DATAREQUEST_CREATE, context, data_dict)
 
     # Validate data
     validator.validate_datarequest(context, data_dict)
@@ -159,7 +162,8 @@ def datarequest_create(context, data_dict):
     # Store the data
     data_req = db.DataRequest()
     _undictize_datarequest_basic(data_req, data_dict)
-    data_req.user_id = context['auth_user_obj'].id
+    if context.get('auth_user_obj'):
+        data_req.user_id = context['auth_user_obj'].id
     data_req.open_time = datetime.datetime.now()
 
     session.add(data_req)

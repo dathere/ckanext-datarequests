@@ -20,6 +20,7 @@
 import ckan.model as model
 import ckan.plugins.toolkit as tk
 import db
+from pylons import config
 
 
 def get_comments_number(datarequest_id):
@@ -46,3 +47,8 @@ def get_open_datarequests_badge(show_badge):
                                  {'comments_count': get_open_datarequests_number()})
     else:
         return ''
+
+
+def get_anonymous_access():
+    anonymous_access = tk.asbool(config.get('ckanext.datarequests.anonymous', False))
+    return anonymous_access
