@@ -94,7 +94,8 @@ def init_db(model):
             sa.Column('open_time', sa.types.DateTime, primary_key=False, default=None),
             sa.Column('accepted_dataset_id', sa.types.UnicodeText, primary_key=False, default=None),
             sa.Column('close_time', sa.types.DateTime, primary_key=False, default=None),
-            sa.Column('closed', sa.types.Boolean, primary_key=False, default=False)
+            sa.Column('closed', sa.types.Boolean, primary_key=False, default=False),
+            extend_existing=True
         )
 
         # Create the table only if it does not exist
@@ -134,7 +135,8 @@ def init_db(model):
             sa.Column('user_id', sa.types.UnicodeText, primary_key=False, default=u''),
             sa.Column('datarequest_id', sa.types.UnicodeText, primary_key=True, default=uuid4),
             sa.Column('time', sa.types.DateTime, primary_key=True, default=u''),
-            sa.Column('comment', sa.types.Unicode(constants.COMMENT_MAX_LENGTH), primary_key=False, default=u'')
+            sa.Column('comment', sa.types.Unicode(constants.COMMENT_MAX_LENGTH), primary_key=False, default=u''),
+            extend_existing=True
         )
 
         # Create the table only if it does not exist
