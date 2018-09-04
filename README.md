@@ -207,9 +207,9 @@ ckan.datarequests.comments = [true|false]
 ```
 ckan.datarequests.show_datarequests_badge = [true|false]
 ```
-* Enable anonymous users to create new data requests by setting up the `ckan.datarequests.anonymous` property in the configuration file (by default, anonymous requests are disabled). Anonymous users cannot edit or delete existing data requests.
+* Enable anonymous users to create new data requests by setting up the `ckanext.datarequests.anonymous` property in the configuration file (by default, anonymous requests are disabled). Anonymous users cannot edit or delete existing data requests.
 ```
-ckan.datarequests.anonymous = [true|false]
+ckanext.datarequests.anonymous = [true|false]
 ```
 * Restart your apache2 reserver
 ```
