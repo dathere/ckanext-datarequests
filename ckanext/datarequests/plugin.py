@@ -16,32 +16,30 @@
 
 # You should have received a copy of the GNU Affero General Public License
 # along with CKAN Data Requests Extension. If not, see <http://www.gnu.org/licenses/>.
+import os
+import sys
 
 import ckan.lib.helpers as h
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
-import auth
-import actions
-import constants
-import helpers
-import os
-import sys
+import ckanext.datarequests.auth as auth
+import ckanext.datarequests.actions as actions
+import ckanext.datarequests.constants as constants
+import ckanext.datarequests.helpers as helpers
 
 from functools import partial
-from pylons import config
 
 
 def get_config_bool_value(config_name, default_value=False):
-    value = config.get(config_name, default_value)
+    value = tk.config.get(config_name, default_value)
     value = value if type(value) == bool else value != 'False'
     return value
 
 def is_fontawesome_4():
-    if hasattr(h, 'ckan_version'):
-        ckan_version = float(h.ckan_version()[0:3])
-        return ckan_version >= 2.7
-    else:
+    if not hasattr(h, 'ckan_version'):
         return False
+    ckan_version = float(h.ckan_version()[:3])
+    return ckan_version >= 2.7
 
 def get_plus_icon():
     return 'plus-square' if is_fontawesome_4() else 'plus-sign-alt'

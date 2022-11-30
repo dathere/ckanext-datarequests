@@ -17,23 +17,22 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with CKAN Data Requests Extension. If not, see <http://www.gnu.org/licenses/>.
 
-
-import ckan.lib.base as base
-import ckan.model as model
-import ckan.plugins as plugins
-import constants
-import datetime
 import cgi
-import db
 import logging
-import validator
+import datetime
+
 import ckan.lib.mailer as mailer
+import ckan.model as model
+import ckan.plugins.toolkit as tk
 
-from pylons import config
+import ckanext.datarequests.constants as constants
+import ckanext.datarequests.db as db
+import ckanext.datarequests.validator as validator
 
-c = plugins.toolkit.c
+
 log = logging.getLogger(__name__)
-tk = plugins.toolkit
+
+confg = tk.config
 
 # Avoid user_show lag
 USERS_CACHE = {}
@@ -43,10 +42,9 @@ def _get_user(user_id):
     try:
         if user_id in USERS_CACHE:
             return USERS_CACHE[user_id]
-        else:
-            user = tk.get_action('user_show')({'ignore_auth': True}, {'id': user_id})
-            USERS_CACHE[user_id] = user
-            return user
+        user = tk.get_action('user_show')({'ignore_auth': True}, {'id': user_id})
+        USERS_CACHE[user_id] = user
+        return user
     except Exception as e:
         log.warn(e)
 
@@ -108,7 +106,7 @@ def _undictize_datarequest_basic(data_request, data_dict):
     data_request.title = data_dict['title']
     data_request.description = data_dict['description']
     organization = data_dict['organization_id']
-    data_request.organization_id = organization if organization else None
+    data_request.organization_id = organization or None
 
 
 def _dictize_comment(comment):
@@ -134,14 +132,13 @@ def _get_datarequest_involved_users(context, datarequest_dict):
     new_context = {'ignore_auth': True, 'model': context['model'] }
 
     # Creator + Followers + People who has commented + Organization Staff
-    users = set()
-    users.add(datarequest_dict['user_id'])
+    users = {datarequest_dict['user_id']}
     users.update([follower.user_id for follower in db.DataRequestFollower.get(datarequest_id=datarequest_id)])
     users.update([comment['user_id'] for comment in list_datarequest_comments(new_context, {'datarequest_id': datarequest_id})])
 
     if datarequest_dict['organization']:
         users.update([user['id'] for user in datarequest_dict['organization']['users']])
-    
+
     # Notifications are not sent to the user that performs the action
     users.discard(context['auth_user_obj'].id)
 
@@ -156,12 +153,12 @@ def _send_mail(user_ids, action_type, datarequest):
             extra_vars = {
                 'datarequest': datarequest,
                 'user': user_data,
-                'site_title': config.get('ckan.site_title'),
-                'site_url': config.get('ckan.site_url')
+                'site_title': tk.config.get('ckan.site_title'),
+                'site_url': tk.config.get('ckan.site_url')
             }
 
-            subject = base.render_jinja2('emails/subjects/{0}.txt'.format(action_type), extra_vars)
-            body = base.render_jinja2('emails/bodies/{0}.txt'.format(action_type), extra_vars)
+            subject = tk.render('emails/subjects/{0}.txt'.format(action_type), extra_vars)
+            body = tk.render('emails/bodies/{0}.txt'.format(action_type), extra_vars)
 
             mailer.mail_user(user_data, subject, body)
 
@@ -202,7 +199,7 @@ def create_datarequest(context, data_dict):
     db.init_db(model)
 
     # Check access
-    anonymous_access = plugins.toolkit.asbool(config.get('ckanext.datarequests.anonymous', False))
+    anonymous_access = tk.asbool(tk.config.get('ckanext.datarequests.anonymous', False))
     if not anonymous_access:
         tk.check_access(constants.CREATE_DATAREQUEST, context, data_dict)
 
