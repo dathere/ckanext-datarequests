@@ -6,7 +6,7 @@ from ckanext.datarequests.plugins import get_plus_icon, get_question_icon
 class MixinPlugin(p.SingletonPlugin):
     p.implements(p.IRoutes, inherit=True)
 
- ######################################################################
+    ######################################################################
     ############################## IROUTES ###############################
     ######################################################################
 
