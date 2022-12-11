@@ -261,7 +261,7 @@ class DataRequestsUI(base.BaseController):
             tk.check_access(constants.DELETE_DATAREQUEST, context, data_dict)
             datarequest = tk.get_action(constants.DELETE_DATAREQUEST)(context, data_dict)
             helpers.flash_notice(tk._('Data Request %s has been deleted') % datarequest.get('title', ''))
-            tk.redirect_to(helpers.url_for(controller='ckanext.datarequests.controllers.ui_controller:DataRequestsUI', action='index'))
+            tk.redirect_to(helpers.url_for('datarequests_index'))
         except tk.ObjectNotFound as e:
             log.warn(e)
             tk.abort(404, tk._('Data Request %s not found') % id)

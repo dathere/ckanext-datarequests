@@ -18,6 +18,8 @@
 # along with CKAN Data Requests Extension. If not, see <http://www.gnu.org/licenses/>.
 import os
 import sys
+import json
+from six import string_types
 
 import ckan.lib.helpers as h
 import ckan.plugins as p
@@ -53,6 +55,9 @@ if tk.check_ckan_version(min_version='2.9.0'):
 else:
     from ckanext.datarequests.plugins.pylons_plugin import MixinPlugin
 
+comments_enabled = tk.asbool(tk.config.get('ckan.datarequests.comments', True))
+_show_datarequests_badge = tk.asbool(tk.config.get('ckan.datarequests.show_datarequests_badge'))
+name = 'datarequests'
 class DataRequestsPlugin(MixinPlugin, p.SingletonPlugin):
 
     p.implements(p.IActions)
@@ -65,12 +70,7 @@ class DataRequestsPlugin(MixinPlugin, p.SingletonPlugin):
         p.implements(p.ITranslation)
     except AttributeError:
         pass
-
-    def __init__(self, name=None):
-        self.comments_enabled = get_config_bool_value('ckan.datarequests.comments', True)
-        self._show_datarequests_badge = get_config_bool_value('ckan.datarequests.show_datarequests_badge')
-        self.name = 'datarequests'
-
+    
     ######################################################################
     ############################## IACTIONS ##############################
     ######################################################################
@@ -87,7 +87,7 @@ class DataRequestsPlugin(MixinPlugin, p.SingletonPlugin):
             constants.UNFOLLOW_DATAREQUEST: actions.unfollow_datarequest,
         }
 
-        if self.comments_enabled:
+        if comments_enabled:
             additional_actions[constants.COMMENT_DATAREQUEST] = actions.comment_datarequest
             additional_actions[constants.LIST_DATAREQUEST_COMMENTS] = actions.list_datarequest_comments
             additional_actions[constants.SHOW_DATAREQUEST_COMMENT] = actions.show_datarequest_comment
@@ -112,7 +112,7 @@ class DataRequestsPlugin(MixinPlugin, p.SingletonPlugin):
             constants.UNFOLLOW_DATAREQUEST: auth.unfollow_datarequest,
         }
 
-        if self.comments_enabled:
+        if comments_enabled:
             auth_functions[constants.COMMENT_DATAREQUEST] = auth.comment_datarequest
             auth_functions[constants.LIST_DATAREQUEST_COMMENTS] = auth.list_datarequest_comments
             auth_functions[constants.SHOW_DATAREQUEST_COMMENT] = auth.show_datarequest_comment
@@ -136,7 +136,25 @@ class DataRequestsPlugin(MixinPlugin, p.SingletonPlugin):
         # Register this plugin's fanstatic directory with CKAN.
         tk.add_resource('../fanstatic', 'datarequest')
 
-   
+        if p.toolkit.check_ckan_version(min_version='2.9.0'):
+            mappings = config.get('ckan.legacy_route_mappings', {})
+            if isinstance(mappings, string_types):
+                mappings = json.loads(mappings)
+            mappings.update({
+                'datarequests_index': 'datarequests.index',
+                'datarequests_new': 'datarequests.new',
+                'show_datarequest': 'datarequests.show',
+                'datarequests_update': 'datarequests.update',
+                'datarequests_delete': 'datarequests.delete',
+                'datarequests_close': 'datarequests.close',
+                'datarequests_follow': 'datarequests.follow',
+                'datarequests_unfollow': 'datarequests.unfollow',
+                'datarequests_comment': 'datarequests.comment',
+                'datarequests_comment_delete': 'datarequests.comment_delete',
+                'organization_datarequests': 'datarequests.organization_datarequests',
+                'user_datarequests': 'datarequests.user_datarequests',
+            })
+
 
     ######################################################################
     ######################### ITEMPLATESHELPER ###########################
@@ -148,7 +166,7 @@ class DataRequestsPlugin(MixinPlugin, p.SingletonPlugin):
             'get_comments_number': helpers.get_comments_number,
             'get_comments_badge': helpers.get_comments_badge,
             'get_open_datarequests_number': helpers.get_open_datarequests_number,
-            'get_open_datarequests_badge': partial(helpers.get_open_datarequests_badge, self._show_datarequests_badge),
+            'get_open_datarequests_badge': partial(helpers.get_open_datarequests_badge, _show_datarequests_badge),
             'get_anonymous_access': helpers.get_anonymous_access,
             'get_plus_icon': get_plus_icon,
             'is_following_datarequest': helpers.is_following_datarequest

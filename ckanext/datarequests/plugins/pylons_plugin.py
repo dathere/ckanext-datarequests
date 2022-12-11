@@ -1,4 +1,5 @@
 import ckan.plugins as p
+import ckan.plugins.toolkit as tk
 
 import ckanext.datarequests.constants as constants
 from ckanext.datarequests.plugins import get_plus_icon, get_question_icon
@@ -6,6 +7,7 @@ from ckanext.datarequests.plugins import get_plus_icon, get_question_icon
 class MixinPlugin(p.SingletonPlugin):
     p.implements(p.IRoutes, inherit=True)
 
+        
     ######################################################################
     ############################## IROUTES ###############################
     ######################################################################
@@ -17,27 +19,27 @@ class MixinPlugin(p.SingletonPlugin):
                   action='index', conditions=dict(method=['GET']))
 
         # Create a Data Request
-        m.connect('/%s/new' % constants.DATAREQUESTS_MAIN_PATH,
+        m.connect('datarequests_new', '/%s/new' % constants.DATAREQUESTS_MAIN_PATH,
                   controller='ckanext.datarequests.controllers.ui_controller:DataRequestsUI',
                   action='new', conditions=dict(method=['GET', 'POST']))
 
         # Show a Data Request
-        m.connect('show_datarequest', '/%s/{id}' % constants.DATAREQUESTS_MAIN_PATH,
+        m.connect('datarequests_show', '/%s/{id}' % constants.DATAREQUESTS_MAIN_PATH,
                   controller='ckanext.datarequests.controllers.ui_controller:DataRequestsUI',
                   action='show', conditions=dict(method=['GET']), ckan_icon=get_question_icon())
 
         # Update a Data Request
-        m.connect('/%s/edit/{id}' % constants.DATAREQUESTS_MAIN_PATH,
+        m.connect('datarequests_update','/%s/edit/{id}' % constants.DATAREQUESTS_MAIN_PATH,
                   controller='ckanext.datarequests.controllers.ui_controller:DataRequestsUI',
                   action='update', conditions=dict(method=['GET', 'POST']))
 
         # Delete a Data Request
-        m.connect('/%s/delete/{id}' % constants.DATAREQUESTS_MAIN_PATH,
+        m.connect('datarequests_delete','/%s/delete/{id}' % constants.DATAREQUESTS_MAIN_PATH,
                   controller='ckanext.datarequests.controllers.ui_controller:DataRequestsUI',
                   action='delete', conditions=dict(method=['POST']))
 
         # Close a Data Request
-        m.connect('/%s/close/{id}' % constants.DATAREQUESTS_MAIN_PATH,
+        m.connect('datarequests_close', '/%s/close/{id}' % constants.DATAREQUESTS_MAIN_PATH,
                   controller='ckanext.datarequests.controllers.ui_controller:DataRequestsUI',
                   action='close', conditions=dict(method=['GET', 'POST']))
 
@@ -54,11 +56,11 @@ class MixinPlugin(p.SingletonPlugin):
                   ckan_icon=get_question_icon())
 
         # Follow & Unfollow
-        m.connect('/%s/follow/{id}' % constants.DATAREQUESTS_MAIN_PATH,
+        m.connect('datarequests_follow', '/%s/follow/{id}' % constants.DATAREQUESTS_MAIN_PATH,
                   controller='ckanext.datarequests.controllers.ui_controller:DataRequestsUI',
                   action='follow', conditions=dict(method=['POST']))
 
-        m.connect('/%s/unfollow/{id}' % constants.DATAREQUESTS_MAIN_PATH,
+        m.connect('datarequests_unfollow','/%s/unfollow/{id}' % constants.DATAREQUESTS_MAIN_PATH,
                   controller='ckanext.datarequests.controllers.ui_controller:DataRequestsUI',
                   action='unfollow', conditions=dict(method=['POST']))
 

@@ -1,22 +1,22 @@
 {% extends "datarequests/base.html" %}
 
-{% block title %}Data Request {{c.datarequest.get('title', '')}}{% endblock %}
+{% block title %}Data Request {{g.datarequest.get('title', '')}}{% endblock %}
 
-{% set datarequest_id = c.datarequest.get('id') %}
+{% set datarequest_id = g.datarequest.get('id') %}
 
 {% block breadcrumb_content %}
-  <li>{% link_for _('Data Requests'), controller='ckanext.datarequests.controllers.ui_controller:DataRequestsUI', action='index' %}</li>
-  <li>{% link_for c.datarequest.get('title'), controller='ckanext.datarequests.controllers.ui_controller:DataRequestsUI', action='show', id=datarequest_id %}</li>
+  <li>{% link_for _('Data Requests'), named_route='datarequests_index' %}</li>
+  <li>{% link_for g.datarequest.get('title'), named_route='datarequests_show', id=datarequest_id %}</li>
 {% endblock %}
 
 {% block content_action %}
 
   {% if h.check_access('update_datarequest', {'id':datarequest_id }) %}
-    {% link_for _('Manage'), controller='ckanext.datarequests.controllers.ui_controller:DataRequestsUI', action='update', id=datarequest_id, class_='btn', icon='wrench' %}
+    {% link_for _('Manage'), named_route='datarequests_update', id=datarequest_id, class_='btn', icon='wrench' %}
   {% endif %}
 
-  {% if h.check_access('close_datarequest', {'id':datarequest_id }) and not c.datarequest.closed %}
-    {% link_for _('Close'), controller='ckanext.datarequests.controllers.ui_controller:DataRequestsUI', action='close', id=datarequest_id, class_='btn btn-danger', icon='lock' %}
+  {% if h.check_access('close_datarequest', {'id':datarequest_id }) and not g.datarequest.closed %}
+    {% link_for _('Close'), named_route='datarequests_close', id=datarequest_id, class_='btn btn-danger', icon='lock' %}
   {% endif %}
 
 {% endblock %}
@@ -30,7 +30,7 @@
 {% endblock %}
 
 {% block secondary_content %}
-  {% snippet "datarequests/snippets/followers.html", datarequest=c.datarequest %}
+  {% snippet "datarequests/snippets/followers.html", datarequest=g.datarequest %}
 
   {% block package_social %}
     {% snippet "snippets/social.html" %}
@@ -39,7 +39,7 @@
 {% endblock %}
 
 {% block primary_content_inner %}
-    {% if c.datarequest.closed %}
+    {% if g.datarequest.closed %}
       <span class="uppercase label label-closed pull-right">
         <i class="icon-lock fa fa-lock"></i>
         {{ _('Closed') }}
@@ -51,18 +51,18 @@
       </span>
     {% endif %}
 
-  <h1 class="{% block page_heading_class %}page-heading{% endblock %}">{% block page_heading %}{{ c.datarequest.get('title') }}{% endblock %}</h1>
+  <h1 class="{% block page_heading_class %}page-heading{% endblock %}">{% block page_heading %}{{ g.datarequest.get('title') }}{% endblock %}</h1>
 
   {% block datarequest_description %}
-    {% if c.datarequest.get('description') %}
+    {% if g.datarequest.get('description') %}
       <div class="notes embedded-content">
-        {{ h.render_markdown(c.datarequest.get('description')) }}
+        {{ h.render_markdown(g.datarequest.get('description')) }}
       </div>
     {% endif %}
   {% endblock %}
 
   {% block datarequest_additional_info %}
-    {% snippet "datarequests/snippets/additional_info.html", datarequest=c.datarequest %}
+    {% snippet "datarequests/snippets/additional_info.html", datarequest=g.datarequest %}
   {% endblock %}
 
 {% endblock %}

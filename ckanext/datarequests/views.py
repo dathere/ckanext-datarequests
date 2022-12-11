@@ -7,10 +7,11 @@ import ckan.plugins.toolkit as tk
 from ckan.common import g
 
 import ckanext.datarequests.constants as constants
+from functools import partial
 
 log = logging.getLogger(__name__)
 
-datarequest = Blueprint('datarequest', __name__)
+datarequest = Blueprint('datarequests', __name__)
 
 
 def _get_context():
@@ -125,14 +126,14 @@ def index():
 
 def _process_post(action, context):
     # If the user has submitted the form, the data request must be created
-    if request.method in ['POST']:
+    if tk.request.method in ['POST']:
         data_dict = {}
-        data_dict['title'] = request.POST.get('title', '')
-        data_dict['description'] = request.POST.get('description', '')
-        data_dict['organization_id'] = request.POST.get('organization_id', '')
+        data_dict['title'] = tk.request.params.get('title', '')
+        data_dict['description'] = tk.request.params.get('description', '')
+        data_dict['organization_id'] = tk.request.params.get('organization_id', '')
 
         if action == constants.UPDATE_DATAREQUEST:
-            data_dict['id'] = request.POST.get('id', '')
+            data_dict['id'] = tk.request.params.get('id', '')
 
         try:
             result = tk.get_action(action)(context, data_dict)
@@ -210,7 +211,7 @@ def update(id):
         g.datarequest = tk.get_action(
             constants.SHOW_DATAREQUEST)(context, data_dict)
         g.original_title = g.datarequest.get('title')
-        self._process_post(constants.UPDATE_DATAREQUEST, context)
+        _process_post(constants.UPDATE_DATAREQUEST, context)
         return tk.render('datarequests/edit.html')
     except tk.ObjectNotFound as e:
         log.warn(e)
@@ -241,16 +242,16 @@ def delete(id):
 def organization_datarequests(organization_id):
     context = _get_context()
     g.group_dict = tk.get_action('organization_show')(context, {'id': id})
-    url_func = functools.partial(org_datarequest_url, id=id)
+    url_func = partial(helpers.url_for('datarequest.organization_datarequest', id=id))
     return _show_index(None, id, False, url_func, 'organization/datarequests.html')
 
 
 def user_datarequests(id):
     context = _get_context()
-    c.user_dict = tk.get_action('user_show')(
+    g.user_dict = tk.get_action('user_show')(
         context, {'id': id, 'include_num_followers': True})
-    url_func = functools.partial(user_datarequest_url, id=id)
-    return _show_index(id, request.params.get('organization', ''), True, url_func, 'user/datarequests.html')
+    url_func = partial(helpers.url_for('datarequest.organization_datarequest', id=id))
+    return _show_index(id, tk.request.params.get('organization', ''), True, url_func, 'user/datarequests.html')
 
 
 def close(id):
@@ -325,13 +326,13 @@ def comment(id):
                         context, data_dict_comment_list)
 
         # Raises 404 Not Found if the data request does not exist
-        c.datarequest = tk.get_action(constants.SHOW_DATAREQUEST)(
+        g.datarequest = tk.get_action(constants.SHOW_DATAREQUEST)(
             context, data_dict_dr_show)
 
-        comment_text = request.params.get('comment', '')
-        comment_id = request.params.get('comment-id', '')
+        comment_text = tk.request.params.get('comment', '')
+        comment_id = tk.request.params.get('comment-id', '')
 
-        if request.mehtond in ['POST']:
+        if tk.request.mehtod in ['POST']:
             action = constants.COMMENT_DATAREQUEST
             action_text = 'comment'
 
@@ -420,4 +421,17 @@ def unfollow(datarequest_id):
 
 datarequest.add_url_rule(
     '/datarequest/new', view_func=new, methods=['GET', 'POST'])
-datarequest.add_url_rule('/datarequest', view_func=index, methods=['GET'])
+datarequest.add_url_rule('/datarequest', view_func=index, methods=['GET', 'POST'])
+datarequest.add_url_rule('/datarequest/<id>', view_func=show, methods=['GET', 'POST'])
+datarequest.add_url_rule('/datarequest/edit/<id>', view_func=update, methods=['GET', 'POST'])
+datarequest.add_url_rule('/datarequest/delete/<id>', view_func=delete, methods=['GET', 'POST'])
+datarequest.add_url_rule('/datarequest/close/<id>', view_func=close, methods=['GET', 'POST'])
+datarequest.add_url_rule('/datarequest/comment/<id>', view_func=comment, methods=['GET', 'POST'])
+datarequest.add_url_rule('/datarequest/comment/<datarequest_id>/delete/<comment_id>', view_func=delete_comment, methods=['GET', 'POST'])
+datarequest.add_url_rule('/datarequest/follow/<datarequest_id>', view_func=follow, methods=['GET', 'POST'])
+datarequest.add_url_rule('/datarequest/unfollow/<datarequest_id>', view_func=unfollow, methods=['GET', 'POST'])
+datarequest.add_url_rule('/organization/datarequest/<id>', view_func=organization_datarequests, methods=['GET', 'POST'])
+datarequest.add_url_rule('/user/datarequest/<id>', view_func=user_datarequests, methods=['GET', 'POST'])
+
+def get_blueprints():
+    return [datarequest]
