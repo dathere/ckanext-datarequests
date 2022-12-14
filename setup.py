@@ -54,7 +54,7 @@ setup(
     entry_points='''
 
         [ckan.plugins]
-        datarequests=ckanext.datarequests.plugin:DataRequestsPlugin
+        datarequests=ckanext.datarequests.plugins:DataRequestsPlugin
 
         [babel.extractors]
         ckan = ckan.lib.extract:extract_ckan

@@ -19,10 +19,7 @@
 
 import ckan.model as model
 import ckan.plugins.toolkit as tk
-import db
-from pylons import config
-
-from ckan.common import c
+import ckanext.datarequests.db as db
 
 
 def get_comments_number(datarequest_id):
@@ -45,7 +42,7 @@ def get_open_datarequests_number():
 def is_following_datarequest(datarequest_id):
     # DB should be intialized
     db.init_db(model)
-    return len(db.DataRequestFollower.get(datarequest_id=datarequest_id, user_id=c.userobj.id)) > 0
+    return len(db.DataRequestFollower.get(datarequest_id=datarequest_id, user_id=tk.g.userobj.id)) > 0
 
 
 def get_open_datarequests_badge(show_badge):
@@ -58,5 +55,4 @@ def get_open_datarequests_badge(show_badge):
 
 
 def get_anonymous_access():
-    anonymous_access = tk.asbool(config.get('ckanext.datarequests.anonymous', False))
-    return anonymous_access
+    return tk.asbool(tk.config.get('ckanext.datarequests.anonymous', False))
